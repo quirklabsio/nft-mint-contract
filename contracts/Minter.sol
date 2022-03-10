@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -94,6 +95,11 @@ contract Minter is ERC721, Ownable {
   // Update mint price
   function setMintPrice(uint256 newPrice) external onlyOwner {
     mintPrice = newPrice;
+  }
+
+  // Get next tokenId
+  function getNextTokenId() external view returns (uint256) {
+    return _tokenIds.current();
   }
 
   // Verify that the given leaf belongs to a given tree using its root for comparison
