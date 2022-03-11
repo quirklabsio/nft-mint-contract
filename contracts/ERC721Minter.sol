@@ -61,7 +61,7 @@ contract ERC721Minter is ERC721, Ownable {
       _mintTo(_msgSender());
       _devMintCounter.increment();
     }
-	}
+  }
 
   /**
   @notice Get the number of tokens minted by devs.
@@ -111,7 +111,7 @@ contract ERC721Minter is ERC721, Ownable {
   function withdrawTo(address to) external onlyOwner {
     (bool success, ) = to.call{value: address(this).balance}("");
     require(success, "Transfer failed");
-	}
+  }
 
   /**
   @notice Freeze metadata when ready to permanently lock.
@@ -144,7 +144,7 @@ contract ERC721Minter is ERC721, Ownable {
 
   /**
   @notice Get next available token id. 
-  Subtract 1 from the return value to get the number of tokens already minted.
+  Subtract 1 from the return value to get the number of tokens minted.
   */
   function getNextTokenId() external view returns (uint256) {
     return _tokenIdTracker.current();
@@ -179,5 +179,5 @@ contract ERC721Minter is ERC721, Ownable {
 
     _safeMint(to, _tokenIdTracker.current());
     _tokenIdTracker.increment();
-	}
+  }
 }
