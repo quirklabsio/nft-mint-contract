@@ -52,7 +52,7 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Mint tokens reserved for devs. The intention is to call this once — passing in `AMOUNT_FOR_DEVS`.
+  @notice Mints tokens reserved for devs. The intention is to call this once — passing in `AMOUNT_FOR_DEVS`.
   However, there are cases where we may need to call this again (e.g., reach allow list deadline to mint with tokens still available).
   @param count The number of tokens to mint
   */
@@ -64,14 +64,14 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Get the number of tokens minted by devs.
+  @notice Gets the number of tokens minted by devs.
   */
   function getDevMintCount() external view returns(uint256) {
     return _devMintCounter.current();
   }
 
   /**
-  @notice Set merkle root. The merkle tree is generated off-chain from a list of addresses.
+  @notice Sets merkle root. The merkle tree is generated off-chain from a list of addresses.
   The intention is to call this once.
   */
   function setMerkleRoot(bytes32 root) external onlyOwner {
@@ -81,7 +81,7 @@ contract ERC721Minter is ERC721, Ownable {
   }  
 
   /**
-  @notice Make sale active (or pause sale if necessary).
+  @notice Makes sale active (or pauses sale if necessary).
   */
   function flipSaleState() external onlyOwner {
     saleIsActive = !saleIsActive;
@@ -106,7 +106,7 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Withdraw balance to the supplied address.
+  @notice Withdraws balance to the supplied address.
   */
   function withdrawTo(address to) external onlyOwner {
     (bool success, ) = to.call{value: address(this).balance}("");
@@ -114,7 +114,7 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Freeze metadata when ready to permanently lock.
+  @notice Freezes metadata when ready to permanently lock.
   */
   function freezeMetadata() external onlyOwner {
     require(!metadataIsFrozen, "Metadata is already frozen");
@@ -123,7 +123,7 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Check allow list eligibility for the supplied address.
+  @notice Checks allow list eligibility for the supplied address.
   */
   function checkStatus(address _account, bytes32[] memory _proof) public view returns (Status) {
     require(merkleRoot != "", "Merkle root must not be empty");
@@ -136,14 +136,14 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Update mint price if necessary.
+  @notice Updates mint price if necessary.
   */
   function setMintPrice(uint256 newPrice) external onlyOwner {
     mintPrice = newPrice;
   }
 
   /**
-  @notice Get next available token id. 
+  @notice Gets next available token id. 
   Subtract 1 from the return value to get the number of tokens minted.
   */
   function getNextTokenId() external view returns (uint256) {
@@ -151,7 +151,7 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Verify that the given leaf belongs to a given tree 
+  @notice Verifies that the given leaf belongs to a given tree 
   using its root for comparison.
   */
   function _verifyMerkleLeaf(  
@@ -165,14 +165,14 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Create a merkle leaf from the supplied address.
+  @notice Creates a merkle leaf from the supplied address.
   */
   function _generateMerkleLeaf(address _account) internal pure returns (bytes32) {  
     return keccak256(abi.encodePacked(_account)); 
   }
 
   /**
-  @notice Mint to the supplied address.
+  @notice Mints to the supplied address.
   */
   function _mintTo(address to) private {
     require(_tokenIdTracker.current() <= AMOUNT_FOR_ALLOWLIST + AMOUNT_FOR_DEVS, "Reached max token supply");
