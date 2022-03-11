@@ -126,13 +126,13 @@ contract ERC721Minter is ERC721, Ownable {
   @notice Checks allow list eligibility for the supplied address.
   */
   function checkStatus(address _account, bytes32[] memory _proof) public view returns (Status) {
-    require(merkleRoot != "", "Merkle root must not be empty");
+  require(merkleRoot != "", "Merkle root must not be empty");
 
-    return !_verifyMerkleLeaf(_generateMerkleLeaf(_account), merkleRoot, _proof) 
-            ? Status.NotEligible
-            : allowlistClaimed[_account]
-              ? Status.AlreadyClaimed
-              : Status.Eligible;
+  return !_verifyMerkleLeaf(_generateMerkleLeaf(_account), merkleRoot, _proof) 
+          ? Status.NotEligible
+          : allowlistClaimed[_account]
+            ? Status.AlreadyClaimed
+            : Status.Eligible;
   }
 
   /**
@@ -146,7 +146,7 @@ contract ERC721Minter is ERC721, Ownable {
   @notice Gets next available token id. 
   Subtract 1 from the return value to get the number of tokens minted.
   */
-  function getNextTokenId() external view returns (uint256) {
+  function getNextTokenId() public view returns (uint256) {
     return _tokenIdTracker.current();
   }
 
@@ -175,9 +175,9 @@ contract ERC721Minter is ERC721, Ownable {
   @notice Mints to the supplied address.
   */
   function _mintTo(address to) private {
-    require(_tokenIdTracker.current() <= AMOUNT_FOR_ALLOWLIST + AMOUNT_FOR_DEVS, "Reached max token supply");
+    require(getNextTokenId() <= AMOUNT_FOR_ALLOWLIST + AMOUNT_FOR_DEVS, "Reached max token supply");
 
-    _safeMint(to, _tokenIdTracker.current());
+    _safeMint(to, getNextTokenId());
     _tokenIdTracker.increment();
   }
 }
