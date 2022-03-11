@@ -27,7 +27,7 @@ contract ERC721Minter is ERC721, Ownable {
   bytes32 public merkleRoot; 
 
   bool public saleIsActive = false;
-	bool public metadataIsFrozen = false;
+  bool public metadataIsFrozen = false;
   uint256 public mintPrice = 0.1 ether;
 
   mapping(address => bool) public allowlistClaimed;
@@ -57,10 +57,10 @@ contract ERC721Minter is ERC721, Ownable {
   @param count The number of tokens to mint
   */
   function devMint(uint256 count) external onlyOwner {
-		for (uint256 i = 0; i < count; i++) {
-			_mintTo(_msgSender());
+    for (uint256 i = 0; i < count; i++) {
+      _mintTo(_msgSender());
       _devMintCounter.increment();
-		}
+    }
 	}
 
   /**
@@ -109,8 +109,8 @@ contract ERC721Minter is ERC721, Ownable {
   @notice Withdraw balance to the supplied address.
   */
   function withdrawTo(address to) external onlyOwner {
-		(bool success, ) = to.call{value: address(this).balance}("");
-		require(success, "Transfer failed");
+    (bool success, ) = to.call{value: address(this).balance}("");
+    require(success, "Transfer failed");
 	}
 
   /**
@@ -154,7 +154,7 @@ contract ERC721Minter is ERC721, Ownable {
   @notice Verify that the given leaf belongs to a given tree 
   using its root for comparison.
   */
-	function _verifyMerkleLeaf(  
+  function _verifyMerkleLeaf(  
     bytes32 _leafNode,  
     bytes32 _merkleRoot,  
     bytes32[] memory _proof 
@@ -177,7 +177,7 @@ contract ERC721Minter is ERC721, Ownable {
   function _mintTo(address to) private {
     require(_tokenIdTracker.current() <= AMOUNT_FOR_ALLOWLIST + AMOUNT_FOR_DEVS, "Reached max token supply");
 
-		_safeMint(to, _tokenIdTracker.current());
+    _safeMint(to, _tokenIdTracker.current());
     _tokenIdTracker.increment();
 	}
 }
