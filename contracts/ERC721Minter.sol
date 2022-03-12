@@ -5,9 +5,9 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "./MerkleVerification.sol";
 
-contract ERC721Minter is ERC721, Ownable {
+contract ERC721Minter is ERC721, Ownable, MerkleVerification {
   using Counters for Counters.Counter;
   
   enum Status {
@@ -23,8 +23,6 @@ contract ERC721Minter is ERC721, Ownable {
   Counters.Counter private _devMintCounter;
 
   string private _baseTokenURI;
-
-  bytes32 public merkleRoot; 
 
   bool public saleIsActive = false;
   bool public metadataIsFrozen = false;
@@ -51,6 +49,10 @@ contract ERC721Minter is ERC721, Ownable {
     _baseTokenURI = baseTokenURI;
   }
 
+  function setMerkleRoot(bytes32 _merkleRoot) external virtual override onlyOwner {
+    merkleRoot = _merkleRoot; 
+  } 
+
   /**
   @notice Mints tokens reserved for devs. The intention is to call this once — passing in `AMOUNT_FOR_DEVS`.
   However, there are cases where we may need to call this again (e.g., reach allow list deadline to mint with tokens still available).
@@ -71,16 +73,6 @@ contract ERC721Minter is ERC721, Ownable {
   }
 
   /**
-  @notice Sets merkle root. The merkle tree is generated off-chain from a list of addresses.
-  The intention is to call this once.
-  */
-  function setMerkleRoot(bytes32 root) external onlyOwner {
-    require(!metadataIsFrozen, "Metadata is permanently frozen");
-
-    merkleRoot = root; 
-  }  
-
-  /**
   @notice Makes sale active (or pauses sale if necessary).
   */
   function flipSaleState() external onlyOwner {
@@ -89,7 +81,7 @@ contract ERC721Minter is ERC721, Ownable {
 
   /**
   @notice Mints a token to the caller if requirements are met.
-  @param proof TODO
+  @param proof Sibling hashes on the branch from the leaf to the root of the merkle tree.
   */
   function allowlistMint(bytes32[] memory proof) external payable {
     require(saleIsActive, "Sale must be active to claim");
@@ -126,17 +118,15 @@ contract ERC721Minter is ERC721, Ownable {
   @notice Checks allow list eligibility for the supplied address.
   */
   function checkStatus(address _account, bytes32[] memory _proof) public view returns (Status) {
-  require(merkleRoot != "", "Merkle root must not be empty");
-
-  return !_verifyMerkleLeaf(_generateMerkleLeaf(_account), merkleRoot, _proof) 
-          ? Status.NotEligible
-          : allowlistClaimed[_account]
-            ? Status.AlreadyClaimed
-            : Status.Eligible;
+    return !_verifyMerkleLeaf(_generateMerkleLeaf(_account), _proof) 
+            ? Status.NotEligible
+            : allowlistClaimed[_account]
+              ? Status.AlreadyClaimed
+              : Status.Eligible;
   }
 
   /**
-  @notice Updates mint price if necessary.
+  @notice Updates mint price.
   */
   function setMintPrice(uint256 newPrice) external onlyOwner {
     mintPrice = newPrice;
@@ -148,27 +138,6 @@ contract ERC721Minter is ERC721, Ownable {
   */
   function getNextTokenId() public view returns (uint256) {
     return _tokenIdTracker.current();
-  }
-
-  /**
-  @notice Verifies that the given leaf belongs to a given tree 
-  using its root for comparison.
-  */
-  function _verifyMerkleLeaf(  
-    bytes32 _leafNode,  
-    bytes32 _merkleRoot,  
-    bytes32[] memory _proof 
-  ) 
-    internal pure returns (bool) 
-  {  
-    return MerkleProof.verify(_proof, _merkleRoot, _leafNode); 
-  }
-
-  /**
-  @notice Creates a merkle leaf from the supplied address.
-  */
-  function _generateMerkleLeaf(address _account) internal pure returns (bytes32) {  
-    return keccak256(abi.encodePacked(_account)); 
   }
 
   /**
