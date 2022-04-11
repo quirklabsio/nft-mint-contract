@@ -21,7 +21,6 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
     uint256 private constant AMOUNT_FOR_DEVS = 5;
 
     Counters.Counter private _tokenIdTracker;
-    Counters.Counter private _devMintCounter;
     string private _baseTokenURI;
 
     bool public saleIsActive = false;
@@ -34,6 +33,9 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
     {
         _baseTokenURI = baseTokenURI;
         _tokenIdTracker.increment();
+        for (uint256 i = 0; i < AMOUNT_FOR_DEVS; i++) {
+            _mintTo(_msgSender());
+        }
     }
 
     //////////////////////////////////////////////////////
@@ -69,18 +71,6 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
     }
 
     /**
-    @notice Mints tokens reserved for the team. The intention is to call this once — passing in `AMOUNT_FOR_DEVS`.
-    However, there are cases where we may need to call this again (e.g., reach allow list deadline to mint with tokens still available).
-    @param count The number of tokens to mint
-    */
-    function devMint(uint256 count) external onlyOwner {
-        for (uint256 i = 0; i < count; i++) {
-            _mintTo(_msgSender());
-            _devMintCounter.increment();
-        }
-    }
-
-    /**
     @notice Makes sale active (or pauses sale if necessary).
     */
     function toggleSaleState() external onlyOwner {
@@ -102,20 +92,6 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
         require(!metadataIsFrozen, "Metadata is already frozen");
 
         metadataIsFrozen = true;
-    }
-
-    /**
-    @notice Updates mint price.
-    */
-    function setMintPrice(uint256 _mintPrice) external onlyOwner {
-        mintPrice = _mintPrice;
-    }
-
-    /**
-    @notice Gets the number of tokens minted by devs.
-    */
-    function getDevMintCount() external view returns(uint256) {
-        return _devMintCounter.current();
     }
 
     //////////////////////////////////////////////////////
