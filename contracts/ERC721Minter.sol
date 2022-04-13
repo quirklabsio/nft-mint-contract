@@ -21,17 +21,17 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
     uint256 private constant AMOUNT_FOR_DEVS = 5;
 
     Counters.Counter private _tokenIdTracker;
-    string private _baseTokenURI;
-
+    
+    /// @dev Base token URI used as a prefix by tokenURI().
+    string public baseTokenURI;
     bool public saleIsActive = false;
     bool public metadataIsFrozen = false;
     uint256 public mintPrice = 0.1 ether;
     mapping(address => bool) public allowListClaimed;
 
-    constructor(string memory name, string memory symbol, string memory baseTokenURI) 
+    constructor(string memory name, string memory symbol) 
         ERC721(name, symbol) 
     {
-        _baseTokenURI = baseTokenURI;
         _tokenIdTracker.increment();
         for (uint256 i = 0; i < AMOUNT_FOR_DEVS; i++) {
             _mintTo(_msgSender());
@@ -42,10 +42,17 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
     // External methods
     //////////////////////////////////////////////////////
 
-    function setBaseTokenURI(string memory baseTokenURI) external onlyOwner {
+    /**
+    @notice Returns the total amount of tokens stored by the contract.
+    */
+    function totalSupply() external view returns (uint256) {
+        return getNextTokenId() - 1;
+    }
+
+    function setBaseTokenURI(string memory _baseTokenURI) external onlyOwner {
         require(!metadataIsFrozen, "Metadata is permanently frozen");
 
-        _baseTokenURI = baseTokenURI;
+        baseTokenURI = _baseTokenURI;
     }
 
     function setMerkleRoot(bytes32 _merkleRoot) external virtual override onlyOwner {
@@ -100,7 +107,6 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
 
     /**
     @notice Gets next available token id. 
-    Subtract 1 from the return value to get the number of tokens minted.
     */
     function getNextTokenId() public view returns (uint256) {
         return _tokenIdTracker.current();
@@ -122,7 +128,7 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
     //////////////////////////////////////////////////////
 
     function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
+        return baseTokenURI;
     }
 
     //////////////////////////////////////////////////////
