@@ -17,8 +17,8 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
       NotEligible
     }
 
-    uint256 private constant AMOUNT_FOR_ALLOW_LIST = 995;
-    uint256 private constant AMOUNT_FOR_DEVS = 5;
+    uint256 private constant AMOUNT_FOR_ALLOW_LIST = 992;
+    uint256 private constant AMOUNT_FOR_DEVS = 8;
 
     Counters.Counter private _tokenIdTracker;
     
@@ -141,7 +141,7 @@ contract ERC721Minter is ERC721, Ownable, MerkleVerification {
     function _mintTo(address to) private {
         require(getNextTokenId() <= AMOUNT_FOR_ALLOW_LIST + AMOUNT_FOR_DEVS, "Reached max token supply");
 
-        _safeMint(to, getNextTokenId());
+        _mint(to, getNextTokenId());
         _tokenIdTracker.increment();
     }
 }
