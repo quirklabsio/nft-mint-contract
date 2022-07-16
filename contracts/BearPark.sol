@@ -15,5 +15,5 @@ ______                  ______          _
 */
 
 contract BearPark is ERC721Minter {
-    constructor() ERC721Minter("Bear Park", "BEAR") {}
+    constructor() ERC721Minter("Bear Park VIP Pass", "PASS") {}
 }
